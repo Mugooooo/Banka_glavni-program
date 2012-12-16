@@ -1,13 +1,350 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
+#include <iostream>
+#include "red_polj.h"
+//#include "red_pok.h"
+#include <windows.h>//system("pause");
+#include <ctime>
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
+using namespace std;
+
+tsal*novi_pom_red=new tsal;
+thuman*pom=new thuman;
+int N;
+
+//_______________________________________________________________________________________________ 
+
+struct pom_struct{
+  int ai_input_time;
+int bi_nothing_time;
+int ci_prior;
+int di_trans;
+};
+
+pom_struct*ele;
+
+//_______________________________________________________________________________________________ 
+void gen_pod(tsal*red){
+                            HANDLE hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);
+cout<<"\nUnesite koliko je potrebno generirati podataka klijenata.";
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);
+cout<<"\nUnos:";
+
+cin>>N;
+ele=new pom_struct[N];
+srand((time(0)));
+rand();
+for(int i=0;i<N;i++){
+ele[i].ai_input_time=rand()%401+100;
+ele[i].bi_nothing_time=rand()%401+100;
+do{
+ele[i].ci_prior=rand()%6+1;
+ele[i].di_trans=rand()%4+1;
+}while(ele[i].ci_prior==6&&ele[i].di_trans==4);
+}
+}
+
+//_______________________________________________________________________________________________ 
+
+void ispis_pod(thuman*pom){
+                       HANDLE hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);
+cout<<"Podatci klijenta.\n";
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);
+cout<<"\n\tIme:"<<pom->ime;
+cout<<"\tPrezime:"<<pom->prezime;
+cout<<"\n\tGodina:"<<pom->godina;
+cout<<"\n\tStanje na tekucem racunu:"<<pom->stanje_tekuci;
+cout<<"\n\tStanje na deviznom racunu:"<<pom->stanje_devizni;
+cout<<"\n\tValuta deviznog racuna:"<<pom->valuta;
+cout<<"\n\tVrijeme ulaska:"<<pom->ai_input_time;
+cout<<"\n\tTrajanje transakcije:"<<pom->bi_nothing_time;
+cout<<"\n\tPrioritet:"<<pom->ci_prior;
+cout<<"\n\tVrsta transakcije:"<<pom->di_trans;
+}
+
+//_______________________________________________________________________________________________ 
+
+void un_pod(tsal*red){
+for(int i=0;i<N;i++){
+thuman*pomak=new thuman;    
+
+                       HANDLE hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);   
+
+cout<<"Ime:";
+cin>>pomak->ime;
+cout<<"Prezime:";
+cin>>pomak->prezime;
+cout<<"Godina:";
+cin>>pomak->godina;
+cout<<"Stanje na tekucem racunu:";
+cin>>pomak->stanje_tekuci;
+cout<<"Stanje na deviznom racunu:";
+cin>>pomak->stanje_devizni;
+cout<<"Valuta deviznog racuna:";
+cin>>pomak->valuta;
+pomak->ai_input_time=ele[i].ai_input_time;
+pomak->bi_nothing_time=ele[i].bi_nothing_time;
+pomak->ci_prior=ele[i].ci_prior;
+pomak->di_trans=ele[i].di_trans;
+enqueue(red,pomak);
+}
+thuman pomocni_red[N];
+pom=new thuman;
+for(int i=0;i<N;i++){
+pom=front(red);
+memcpy(&pomocni_red[i],pom,sizeof(thuman));
+dequeue(red);
+}
+
+for(int i = 1; i < N; i++) {
+        int j = i - 1;
+        int pom = pomocni_red[i].ci_prior;
+        thuman pom2 = pomocni_red[i];
+        while(j >= 0 && pomocni_red[j].ci_prior > pom) {
+            pomocni_red[j+1] = pomocni_red[j--];
+            pomocni_red[j+1] = pom2;
+        }
+    }
+for(int i=0;i<N;i++){
+thuman*novi=new thuman;
+if(pomocni_red[i].stanje_devizni>10000)ispis_pod(&pomocni_red[i]);
+else{
+memcpy(novi,&pomocni_red[i],sizeof(thuman));
+enqueue(red,novi);
+}
+}
+}
+
+//_______________________________________________________________________________________________ 
+
+void brz_red(tsal*red){
+thuman st[N];
+thuman br[N];
+int br_st=0;
+int brojac_br=0;
+pom=new thuman;
+thuman*novi=new thuman;
+for(int i=0;i<N;i++){
+novi=front(red);
+dequeue(red);
+if(novi->di_trans==3){
+memcpy(&br[brojac_br],novi,sizeof(thuman));
+brojac_br++;
+}
+else {
+memcpy(&st[br_st],novi,sizeof(thuman));
+br_st++;
+}
+}
+for(int i=0;i<br_st;i++){
+novi=new thuman;
+memcpy(novi,&st[i],sizeof(thuman));
+enqueue(red,novi);
+}
+                       HANDLE hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);   
+cout<<"Transakcije iz regularnog reda.";
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);   
+for(int i=0;i<br_st;i++){
+pom=new thuman;
+memcpy(pom,&st[i],sizeof(thuman));
+ispis_pod(pom);
+}
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);   
+cout<<"\n Transakcije iz reda brzih transakcija.";
+     SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n________________________________________________________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);   
+for(int i=0;i<brojac_br;i++){
+memcpy(pom,&br[i],sizeof(thuman));
+ispis_pod(pom);
+}
+}
+
+//_______________________________________________________________________________________________ 
+
+void bris_VIP(tsal*red){
+thuman*novi=new thuman;
+thuman pomocni_red[N];
+int brojac_stare_osobe=0;
+for(int i=0;i<N;i++){
+novi=front(red);
+dequeue(red);
+memcpy(&pomocni_red[i],novi,sizeof(thuman));
+}
+init(red);
+for(int i=0;i<N;i++){
+memcpy(novi,&pomocni_red[i],sizeof(thuman));
+if(novi->ci_prior==4&&(2012-novi->godina)<30&&novi->di_trans==1&&novi->stanje_tekuci<100){
+cout<<"\nNavedeni klijent se ne vraca natrag u red.\n";
+ispis_pod(novi);
+}
+else if(novi->ci_prior==1&&novi->di_trans==2&&novi->stanje_tekuci>5000){
+cout<<"\nNavedeni klijent se ne vraca natrag u red.\n";
+ispis_pod(novi);
+}
+else {
+brojac_stare_osobe++;
+enqueue(red,novi);
+}
+}
+thuman stari_red[brojac_stare_osobe];
+cout<<"\n____________________________Stariji red__________________________\n";
+for(int i=0;i<brojac_stare_osobe;i++){
+
+memcpy(novi,&pomocni_red[i],sizeof(thuman));
+ispis_pod(novi);
+}
+}
+
+//_______________________________________________________________________________________________ 
+
+void nov_sal(int sed,int trenutna_pozicija,tsal*red){
+if(isempty(red)==true)return;
+thuman*p=new thuman;
+if(trenutna_pozicija<sed){
+p=front(red);
+dequeue(red);
+trenutna_pozicija++;
+nov_sal(sed,trenutna_pozicija,red);//
+}
+else {
+while(isempty(red)==false){
+system("pause");
+thuman*d=new thuman;
+d=front(red);
+dequeue(red);
+ispis_pod(d);
+trenutna_pozicija++;
+enqueue(novi_pom_red,d);
+}
+return;
+}
+enqueue(red,p);
+}
+
+//_______________________________________________________________________________________________ 
+
+void nov_sal_2(tsal*red){
+if(isempty(red)==true)return;
+thuman*p=new thuman;
+p=front(red);
+dequeue(red);
+nov_sal_2(red);
+enqueue(red,p);
+ispis_pod(p);
+}
+
+
+//_______________________________________________________________________________________________ 
+//____________________________________MAIN()_____________________________________________________ 
+//_______________________________________________________________________________________________ 
+int main(){
+               HANDLE hConsole;
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    
+SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n\t\t\t\t     N";
+SetConsoleTextAttribute(hConsole, 11);
+    cout<<"Y";
+SetConsoleTextAttribute(hConsole, 10);
+    cout<<"A";
+SetConsoleTextAttribute(hConsole, 15);
+    cout<<"N ";
+SetConsoleTextAttribute(hConsole, 12);
+    cout<<"C";
+SetConsoleTextAttribute(hConsole, 11);
+    cout<<"O";
+SetConsoleTextAttribute(hConsole, 10);
+    cout<<"R";
+SetConsoleTextAttribute(hConsole, 15);
+    cout<<"P \n";
+//_____________________________START____________________________________________________________
+    
+tsal*red=new tsal;
+init(red);
+init(novi_pom_red);
+int izbor=0;
+do{
+               HANDLE hConsole;
+           hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        
+SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n\n_____________________________________Izbornik___________________________________";   
+    SetConsoleTextAttribute(hConsole, 15);   
+       cout<<"\t\t| 1.)Generiranje podataka N cetvorke.                         |\n";  
+       cout<<"\t\t| 2.)Unos podataka o klijentima.                              |\n";
+       cout<<"\t\t| 3.)Opcija za brzi red.                                      |\n";
+       cout<<"\t\t| 4.)Opcija za brisanje VIP klijenata.                        |\n";  
+       cout<<"\t\t| 5.)Opcija za uvodjenje novog saltera.                       |\n";
+       cout<<"\t\t| 0.)Exit                                                     |\n";
+       cout<<"\t\t|_____________________________________________________________|\n";
+       SetConsoleTextAttribute(hConsole, 12);
+    cout<<"\n________________________________________________________________________________\n";
+SetConsoleTextAttribute(hConsole, 15);
+       cout<<"\t\t|Izbor[1-5]:";
+       cin>>izbor;
+switch(izbor){
+              
+              
+case 1:
+gen_pod(red);
+break;
+
+
+
+case 2:
+un_pod(red);
+break;
+
+
+
+case 3:
+brz_red(red);
+break;
+
+
+
+case 4:
+bris_VIP(red);
+break;
+
+
+
+case 5:
+int sed=N*0.7;
+cout<<"Unos novog saltera:"<<sed;
+cout<<"\nIspisivanje pomocnog reda:\n";
+nov_sal(sed,0,red);
+cout<<"Ispisivanje glavnog reda\n";
+nov_sal_2(red);
+
+break;
+
+}
+}while(izbor!=0);
+system("pause");
+return 0;
+}
